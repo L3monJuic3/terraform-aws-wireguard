@@ -48,16 +48,16 @@ resource "aws_launch_configuration" "wireguard_launch_config" {
     wg_server_private_key_aws_ssm_name = var.use_ssm ? aws_ssm_parameter.wireguard_server_private_key[0].name : null,
     wg_server_net                      = var.wg_server_net,
     wg_server_port                     = var.wg_server_port,
-    peers                              = join("\n", [for client in var.wg_clients : templatefile("${path.module}/templates/client-data.tpl", {
+    peers = join("\n", [for client in var.wg_clients : templatefile("${path.module}/templates/client-data.tpl", {
       friendly_name        = client.friendly_name,
       client_pub_key       = client.public_key,
       client_ip            = client.client_ip,
       persistent_keepalive = var.wg_persistent_keepalive
     })]),
-    use_eip                            = var.use_eip ? "enabled" : "disabled",
-    eip_id                             = aws_eip.wireguard.id,
-    use_ssm                            = var.use_ssm ? "true" : "false",
-    wg_server_interface                = var.wg_server_interface
+    use_eip             = var.use_eip ? "enabled" : "disabled",
+    eip_id              = aws_eip.wireguard.id,
+    use_ssm             = var.use_ssm ? "true" : "false",
+    wg_server_interface = var.wg_server_interface
   })
   security_groups             = [aws_security_group.sg_wireguard.id]
   associate_public_ip_address = var.use_eip
@@ -82,28 +82,28 @@ resource "aws_autoscaling_group" "wireguard_asg" {
     create_before_destroy = true
   }
 
-  tags = [
-    {
-      key                 = "Name"
-      value               = aws_launch_configuration.wireguard_launch_config.name
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Project"
-      value               = "wireguard"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "env"
-      value               = var.env
-      propagate_at_launch = true
-    },
-    {
-      key                 = "tf-managed"
-      value               = "True"
-      propagate_at_launch = true
-    },
-  ]
+  tag {
+    key                 = "Name"
+    value               = aws_launch_configuration.wireguard_launch_config.name
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Project"
+    value               = "wireguard"
+    propagate_at_launch = true
+
+  }
+  tag {
+    key                 = "env"
+    value               = var.env
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "tf-managed"
+    value               = "True"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_ssm_parameter" "wireguard_server_private_key" {
