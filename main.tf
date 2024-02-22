@@ -117,14 +117,3 @@ resource "aws_ssm_parameter" "wireguard_server_private_key" {
     Name = "wireguard-${var.env}-${var.region}"
   }
 }
-
-
-resource "tls_private_key" "wireguard-ssh-key" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "aws_key_pair" "wireguard-key-pair" {
-  key_name   = "wireguard-key"
-  public_key = tls_private_key.wireguard_ssh_key.public_key_openssh
-}
